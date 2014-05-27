@@ -47,10 +47,11 @@
   // Define step direction output pins. NOTE: All direction pins must be on the same port.
   #define DIRECTION_DDR     DDRD
   #define DIRECTION_PORT    PORTD
-  #define X_DIRECTION_BIT   5  // Uno Digital Pin 5
-  #define Y_DIRECTION_BIT   6  // Uno Digital Pin 6
-  #define Z_DIRECTION_BIT   7  // Uno Digital Pin 7
-  #define DIRECTION_MASK    ((1<<X_DIRECTION_BIT)|(1<<Y_DIRECTION_BIT)|(1<<Z_DIRECTION_BIT)) // All direction bits
+  #define X_DIRECTION_BIT   (X_STEP_BIT+N_AXIS)  // Uno Digital Pin 5
+  #define Y_DIRECTION_BIT   (X_DIRECTION_BIT+1)  // Uno Digital Pin 6
+  #define Z_DIRECTION_BIT   (X_DIRECTION_BIT+2)  // Uno Digital Pin 7
+  //#define DIRECTION_MASK    ((1<<X_DIRECTION_BIT)|(1<<Y_DIRECTION_BIT)|(1<<Z_DIRECTION_BIT)) // All direction bits
+  #define DIRECTION_MASK ((1<<(X_DIRECTION_BIT+N_AXIS)) - (1<<X_DIRECTION_BIT)) // All direction bits
 
   // Define stepper driver enable/disable output pin.
   #define STEPPERS_DISABLE_DDR    DDRB
@@ -70,6 +71,7 @@
   #else
     #define Z_LIMIT_BIT    3  // Uno Digital Pin 11
   #endif
+  //TODO: make programmatic limit mask that takes into account variable spindle
   #define LIMIT_MASK       ((1<<X_LIMIT_BIT)|(1<<Y_LIMIT_BIT)|(1<<Z_LIMIT_BIT)) // All limit bits
   #define LIMIT_INT        PCIE0  // Pin change interrupt enable pin
   #define LIMIT_INT_vect   PCINT0_vect 
@@ -167,10 +169,12 @@
   #define DIRECTION_DDR      DDRA
   #define DIRECTION_PORT     PORTA
   #define DIRECTION_PIN      PINA
-  #define X_DIRECTION_BIT   5 // MEGA2560 Digital Pin 27
-  #define Y_DIRECTION_BIT   6 // MEGA2560 Digital Pin 28
-  #define Z_DIRECTION_BIT   7 // MEGA2560 Digital Pin 29
-  #define DIRECTION_MASK ((1<<X_DIRECTION_BIT)|(1<<Y_DIRECTION_BIT)|(1<<Z_DIRECTION_BIT)) // All direction bits
+  #define X_DIRECTION_BIT   (X_STEP_BIT+N_AXIS) // MEGA2560 Digital Pin 27
+  #define Y_DIRECTION_BIT   (X_DIRECTION_BIT+1) // MEGA2560 Digital Pin 28
+  #define Z_DIRECTION_BIT   (X_DIRECTION_BIT+2) // MEGA2560 Digital Pin 29
+  //#define DIRECTION_MASK ((1<<X_DIRECTION_BIT)|(1<<Y_DIRECTION_BIT)|(1<<Z_DIRECTION_BIT)) // All direction bits
+  #define DIRECTION_MASK ((1<<(X_DIRECTION_BIT+N_AXIS)) - (1<<X_DIRECTION_BIT)) // All direction bits
+
 
   // Define stepper driver enable/disable output pin.
   #define STEPPERS_DISABLE_DDR   DDRB
@@ -188,7 +192,8 @@
   #define LIMIT_INT       PCIE0  // Pin change interrupt enable pin
   #define LIMIT_INT_vect  PCINT0_vect 
   #define LIMIT_PCMSK     PCMSK0 // Pin change interrupt register
-  #define LIMIT_MASK ((1<<X_LIMIT_BIT)|(1<<Y_LIMIT_BIT)|(1<<Z_LIMIT_BIT)) // All limit bits
+  //#define LIMIT_MASK ((1<<X_LIMIT_BIT)|(1<<Y_LIMIT_BIT)|(1<<Z_LIMIT_BIT)) // All limit bits
+  #define DIRECTION_MASK ((1<<(X_LIMIT_BIT+N_AXIS)) - (1<<X_LIMIT_BIT)) // All direction bits
 
   // Define spindle enable and spindle direction output pins.
   #define SPINDLE_ENABLE_DDR   DDRH

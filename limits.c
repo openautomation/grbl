@@ -130,9 +130,11 @@ void limits_go_home(uint8_t cycle_mask)
   
   // Determine travel distance to the furthest homing switch based on user max travel settings.
   // NOTE: settings.max_travel[] is stored as a negative value.
-  float max_travel = settings.max_travel[X_AXIS];
-  if (max_travel > settings.max_travel[Y_AXIS]) { max_travel = settings.max_travel[Y_AXIS]; }
-  if (max_travel > settings.max_travel[Z_AXIS]) { max_travel = settings.max_travel[Z_AXIS]; }
+  float max_travel = settings.max_travel[0];
+  int i;
+  for (i = 1; i < N_AXIS; i++) {
+    if (max_travel > settings.max_travel[i]) { max_travel = settings.max_travel[i]; }
+  }
   max_travel *= -HOMING_AXIS_SEARCH_SCALAR; // Ensure homing switches engaged by over-estimating max travel.
    
   plan_reset(); // Reset planner buffer to zero planner current position and to clear previous motions.
@@ -161,9 +163,9 @@ void limits_go_home(uint8_t cycle_mask)
 
       // Reset homing axis locks based on cycle mask. 
     uint8_t axislock = 0;
-    if (bit_istrue(cycle_mask,bit(X_AXIS))) { axislock |= (1<<X_STEP_BIT); }
-    if (bit_istrue(cycle_mask,bit(Y_AXIS))) { axislock |= (1<<Y_STEP_BIT); }
-    if (bit_istrue(cycle_mask,bit(Z_AXIS))) { axislock |= (1<<Z_STEP_BIT); }
+    for (i = 0; i < N_AXIS; i++) {
+    	if (bit_istrue(cycle_mask,bit(i))) { axislock |= bit(i+X_STEP_BIT); }
+    }
     sys.homing_axis_lock = axislock;
   
     // Perform homing cycle. Planner buffer should be empty, as required to initiate the homing cycle.
@@ -179,14 +181,10 @@ void limits_go_home(uint8_t cycle_mask)
       // Check limit state. Lock out cycle axes when they change.
       limit_state = LIMIT_PIN;
       if (invert_pin) { limit_state ^= LIMIT_MASK; }
-      if (axislock & (1<<X_STEP_BIT)) {
-        if (limit_state & (1<<X_LIMIT_BIT)) { axislock &= ~(1<<X_STEP_BIT); }
-      }
-      if (axislock & (1<<Y_STEP_BIT)) {
-        if (limit_state & (1<<Y_LIMIT_BIT)) { axislock &= ~(1<<Y_STEP_BIT); }
-      }
-      if (axislock & (1<<Z_STEP_BIT)) {
-        if (limit_state & (1<<Z_LIMIT_BIT)) { axislock &= ~(1<<Z_STEP_BIT); }
+      for (i = 0; i < N_AXIS; i++) {
+        if (axislock & bit(i+X_STEP_BIT)) {
+          if (limit_state & bit(i+X_LIMIT_BIT)) { axislock &= ~bit(i+X_STEP_BIT); }
+        }
       }
       sys.homing_axis_lock = axislock;
       st_prep_buffer(); // Check and prep segment buffer. NOTE: Should take no longer than 200us.

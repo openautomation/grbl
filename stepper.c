@@ -82,9 +82,7 @@ static segment_t segment_buffer[SEGMENT_BUFFER_SIZE];
 // Stepper ISR data struct. Contains the running data for the main stepper ISR.
 typedef struct {
   // Used by the bresenham line algorithm
-  uint32_t counter_x,        // Counter variables for the bresenham line tracer
-           counter_y, 
-           counter_z;
+  uint32_t counters[N_AXIS];        // Counter variables for the bresenham line tracer
   #ifdef STEP_PULSE_DELAY
     uint8_t step_bits;  // Stores out_bits output to complete the step pulse delay
   #endif
@@ -325,18 +323,17 @@ ISR(TIMER1_COMPA_vect)
         st.exec_block = &st_block_buffer[st.exec_block_index];
         
         // Initialize Bresenham line and distance counters
-        st.counter_x = (st.exec_block->step_event_count >> 1);
-        st.counter_y = st.counter_x;
-        st.counter_z = st.counter_x;        
+        int32_t counter = (st.exec_block->step_event_count >> 1);
+        int i;
+        for (i = 0; i < N_AXIS; i++) { st.counters[i] = counter; }
       }
 
       st.dir_outbits = st.exec_block->direction_bits ^ settings.dir_invert_mask; 
 
       #ifdef ADAPTIVE_MULTI_AXIS_STEP_SMOOTHING
         // With AMASS enabled, adjust Bresenham axis increment counters according to AMASS level.
-        st.steps[X_AXIS] = st.exec_block->steps[X_AXIS] >> st.exec_segment->amass_level;
-        st.steps[Y_AXIS] = st.exec_block->steps[Y_AXIS] >> st.exec_segment->amass_level;
-        st.steps[Z_AXIS] = st.exec_block->steps[Z_AXIS] >> st.exec_segment->amass_level;
+        int i;
+        for (i = 0; i < N_AXIS; i++) { st.steps[i] = st.exec_block->steps[i] >> st.exec_segment->amass_level; }
       #endif
       
     } else {
@@ -355,11 +352,25 @@ ISR(TIMER1_COMPA_vect)
   st.step_outbits = 0; 
 
   // Execute step displacement profile by Bresenham line algorithm
-  #ifdef ADAPTIVE_MULTI_AXIS_STEP_SMOOTHING
+  int i;
+  for (i = 0; i < N_AXIS; i++) {
+    #ifdef ADAPTIVE_MULTI_AXIS_STEP_SMOOTHING
+	  st.counters[i] += st.steps[i];
+    #else
+      st.counter[i] += st.exec_block->steps[i];
+    #endif
+      if (st.counters[i] > st.exec_block->step_event_count) {
+        st.step_outbits |= bit(i+X_STEP_BIT);
+        st.counters[i] -= st.exec_block->step_event_count;
+      if (st.exec_block->direction_bits & bit(i+X_DIRECTION_BIT)) { sys.position[i]--; }
+      else { sys.position[i]++; }
+    }
+  }
+  /*#ifdef ADAPTIVE_MULTI_AXIS_STEP_SMOOTHING
     st.counter_x += st.steps[X_AXIS];
   #else
     st.counter_x += st.exec_block->steps[X_AXIS];
-  #endif  
+  #endif
   if (st.counter_x > st.exec_block->step_event_count) {
     st.step_outbits |= (1<<X_STEP_BIT);
     st.counter_x -= st.exec_block->step_event_count;
@@ -387,7 +398,7 @@ ISR(TIMER1_COMPA_vect)
     st.counter_z -= st.exec_block->step_event_count;
     if (st.exec_block->direction_bits & (1<<Z_DIRECTION_BIT)) { sys.position[Z_AXIS]--; }
     else { sys.position[Z_AXIS]++; }
-  }  
+  }*/
 
   // During a homing cycle, lock out and prevent desired axes from moving.
   if (sys.state == STATE_HOMING) { st.step_outbits &= sys.homing_axis_lock; }   
