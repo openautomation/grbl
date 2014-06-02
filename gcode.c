@@ -100,7 +100,7 @@ uint8_t gc_execute_line(char *line)
 
   // Initialize command and value words variables. Tracks words contained in this block.
   uint16_t command_words = 0; // G and M command words. Also used for modal group violations.
-  uint16_t value_words = 0; // Value words. 
+  uint32_t value_words = 0; // Value words. Changed to 32-bit to support more than 6 linear axes
 
   /* -------------------------------------------------------------------------------------
      STEP 2: Import all g-code words in the block line. A g-code word is a letter followed by
@@ -114,6 +114,7 @@ uint8_t gc_execute_line(char *line)
   float value;
   uint8_t int_value = 0;
   uint8_t mantissa = 0; // NOTE: For mantissa values > 255, variable type must be changed to uint16_t.
+  uint8_t idx;
 
   while (line[char_counter] != 0) { // Loop until no more g-code words in line.
     
@@ -310,7 +311,18 @@ uint8_t gc_execute_line(char *line)
           case 'X': word_bit = WORD_X; gc_block.values.xyz[X_AXIS] = value; axis_words |= (1<<X_AXIS); break;
           case 'Y': word_bit = WORD_Y; gc_block.values.xyz[Y_AXIS] = value; axis_words |= (1<<Y_AXIS); break;
           case 'Z': word_bit = WORD_Z; gc_block.values.xyz[Z_AXIS] = value; axis_words |= (1<<Z_AXIS); break;
-          default: FAIL(STATUS_GCODE_UNSUPPORTED_COMMAND);
+          default:
+            //handle additional linear axes starting with the letter 'A' (A => idx=3, B => idx=4, etc.)
+            if (N_AXIS > 3 && letter >= 'A' && letter < 'F') {
+              idx = letter - 'A' + 3;	//axes index
+              if (idx < N_AXIS) {
+                  word_bit = WORD_X + idx;
+                  gc_block.values.xyz[idx] = value;
+                  axis_words |= (1<<idx);
+                  break;
+              }
+            }
+            FAIL(STATUS_GCODE_UNSUPPORTED_COMMAND);
         } 
         
         // NOTE: Variable 'word_bit' is always assigned, if the non-command letter is valid.
@@ -459,7 +471,7 @@ uint8_t gc_execute_line(char *line)
             
   // [12. Set length units ]: N/A
   // Pre-convert XYZ coordinate values to millimeters, if applicable.
-  uint8_t idx;
+  //uint8_t idx;
   if (gc_block.modal.units == UNITS_MODE_INCHES) {
     for (idx=0; idx<N_AXIS; idx++) { // Axes indices are consistent, so loop may be used.
       if (bit_istrue(axis_words,bit(idx)) ) {
@@ -756,7 +768,10 @@ uint8_t gc_execute_line(char *line)
   // [0. Non-specific error-checks]: Complete unused value words check, i.e. IJK used when in arc
   // radius mode, or axis words that aren't used in the block.  
   bit_false(value_words,(bit(WORD_N)|bit(WORD_F)|bit(WORD_S)|bit(WORD_T))); // Remove single-meaning value words. 
-  if (axis_explicit) { bit_false(value_words,(bit(WORD_X)|bit(WORD_Y)|bit(WORD_Z))); } // Remove axis words. 
+  if (axis_explicit) {
+	  //bit_false(value_words,(bit(WORD_X)|bit(WORD_Y)|bit(WORD_Z)));
+	  for(idx = 0; idx < N_AXIS; idx++) bit_false(value_words,(bit(idx+WORD_X)));
+  } // Remove axis words.
   if (value_words) { FAIL(STATUS_GCODE_UNUSED_WORDS); } // [Unused words]
 
    

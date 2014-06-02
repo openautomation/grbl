@@ -72,7 +72,7 @@ typedef struct {
   float arc_tolerance;
   uint8_t decimal_places;
   uint8_t flags;  // Contains default boolean settings
-  uint8_t homing_dir_mask;
+  StepDirWord homing_dir_mask;
   float homing_feed_rate;
   float homing_seek_rate;
   uint16_t homing_debounce_delay;

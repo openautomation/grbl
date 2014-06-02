@@ -30,6 +30,16 @@
 
 //----------------------------------------------------------------------------------------
 
+// Some variables are used as arrays of 1-2 booleans per axis, so they need to be larger to accommodate more axes.
+#if N_AXIS <= 3
+	typedef uint8_t StepDirWord;
+#elif N_AXIS <= 7
+	typedef uint16_t StepDirWord;
+#else
+	#error // The following line will probably work, but I wanted to draw your attention to this issue.
+	typedef uint32_t StepDirWord;
+#endif
+
 #ifdef CPU_MAP_ATMEGA328P // (Arduino Uno) Officially supported by Grbl.
 
   // Define serial port pins and interrupt vectors.
@@ -42,7 +52,8 @@
   #define X_STEP_BIT      2  // Uno Digital Pin 2
   #define Y_STEP_BIT      3  // Uno Digital Pin 3
   #define Z_STEP_BIT      4  // Uno Digital Pin 4
-  #define STEP_MASK       ((1<<X_STEP_BIT)|(1<<Y_STEP_BIT)|(1<<Z_STEP_BIT)) // All step bits
+  //#define STEP_MASK       ((1<<X_STEP_BIT)|(1<<Y_STEP_BIT)|(1<<Z_STEP_BIT)) // All step bits
+  #define STEP_MASK       ((1<<(X_STEP_BIT+N_AXIS)) - (1<<X_STEP_BIT)) // All step bits
 
   // Define step direction output pins. NOTE: All direction pins must be on the same port.
   #define DIRECTION_DDR     DDRD
@@ -193,7 +204,7 @@
   #define LIMIT_INT_vect  PCINT0_vect 
   #define LIMIT_PCMSK     PCMSK0 // Pin change interrupt register
   //#define LIMIT_MASK ((1<<X_LIMIT_BIT)|(1<<Y_LIMIT_BIT)|(1<<Z_LIMIT_BIT)) // All limit bits
-  #define DIRECTION_MASK ((1<<(X_LIMIT_BIT+N_AXIS)) - (1<<X_LIMIT_BIT)) // All direction bits
+  #define LIMIT_MASK ((1<<(X_LIMIT_BIT+N_AXIS)) - (1<<X_LIMIT_BIT)) // All direction bits
 
   // Define spindle enable and spindle direction output pins.
   #define SPINDLE_ENABLE_DDR   DDRH

@@ -117,7 +117,7 @@ ISR(WDT_vect) // Watchdog timer ISR
 // mask, which prevents the stepper algorithm from executing step pulses. Homing motions typically 
 // circumvent the processes for executing motions in normal operation.
 // NOTE: Only the abort runtime command can interrupt this process.
-void limits_go_home(uint8_t cycle_mask) 
+void limits_go_home(StepDirWord cycle_mask)
 {
   if (sys.abort) { return; } // Block if system reset has been issued.
 
@@ -131,9 +131,8 @@ void limits_go_home(uint8_t cycle_mask)
   // Determine travel distance to the furthest homing switch based on user max travel settings.
   // NOTE: settings.max_travel[] is stored as a negative value.
   float max_travel = settings.max_travel[0];
-  int i;
-  for (i = 1; i < N_AXIS; i++) {
-    if (max_travel > settings.max_travel[i]) { max_travel = settings.max_travel[i]; }
+  for (idx = 1; idx < N_AXIS; idx++) {
+    if (max_travel > settings.max_travel[idx]) { max_travel = settings.max_travel[idx]; }
   }
   max_travel *= -HOMING_AXIS_SEARCH_SCALAR; // Ensure homing switches engaged by over-estimating max travel.
    
@@ -154,22 +153,21 @@ void limits_go_home(uint8_t cycle_mask)
       } else {
         target[idx] = 0.0;
       }
+
+      if (bit_istrue(settings.homing_dir_mask,bit(idx+X_DIRECTION_BIT))) { target[idx] = -target[idx]; }
     }      
-    if (bit_istrue(settings.homing_dir_mask,(1<<X_DIRECTION_BIT))) { target[X_AXIS] = -target[X_AXIS]; }
-    if (bit_istrue(settings.homing_dir_mask,(1<<Y_DIRECTION_BIT))) { target[Y_AXIS] = -target[Y_AXIS]; }
-    if (bit_istrue(settings.homing_dir_mask,(1<<Z_DIRECTION_BIT))) { target[Z_AXIS] = -target[Z_AXIS]; }
   
     homing_rate *= sqrt(n_active_axis); // [sqrt(N_AXIS)] Adjust so individual axes all move at homing rate.
 
       // Reset homing axis locks based on cycle mask. 
-    uint8_t axislock = 0;
-    for (i = 0; i < N_AXIS; i++) {
-    	if (bit_istrue(cycle_mask,bit(i))) { axislock |= bit(i+X_STEP_BIT); }
+    StepDirWord axislock = 0;
+    for (idx = 0; idx < N_AXIS; idx++) {
+    	if (bit_istrue(cycle_mask,bit(idx))) { axislock |= bit(idx+X_STEP_BIT); }
     }
     sys.homing_axis_lock = axislock;
   
     // Perform homing cycle. Planner buffer should be empty, as required to initiate the homing cycle.
-    uint8_t limit_state;
+    StepDirWord limit_state;
     #ifdef USE_LINE_NUMBERS
     plan_buffer_line(target, homing_rate, false, HOMING_CYCLE_LINE_NUMBER); // Bypass mc_line(). Directly plan homing motion.
     #else
@@ -181,9 +179,9 @@ void limits_go_home(uint8_t cycle_mask)
       // Check limit state. Lock out cycle axes when they change.
       limit_state = LIMIT_PIN;
       if (invert_pin) { limit_state ^= LIMIT_MASK; }
-      for (i = 0; i < N_AXIS; i++) {
-        if (axislock & bit(i+X_STEP_BIT)) {
-          if (limit_state & bit(i+X_LIMIT_BIT)) { axislock &= ~bit(i+X_STEP_BIT); }
+      for (idx = 0; idx < N_AXIS; idx++) {
+        if (axislock & bit(idx+X_STEP_BIT)) {
+          if (limit_state & bit(idx+X_LIMIT_BIT)) { axislock &= ~bit(idx+X_STEP_BIT); }
         }
       }
       sys.homing_axis_lock = axislock;
