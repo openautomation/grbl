@@ -1,7 +1,7 @@
 #Grbl
 ------------
 
-This branch serves only as a developmental platform for working on new ideas that may eventually be installed into Grbl's edge branch. Please do not use as there is no guarantee this code base is up-to-date or working.
+This is a fork to modify Grbl (github.com/grbl) to work with an arbitrary number of linear, independent axes.  Grbl is limited to 3 hard-coded axes and to drawing arcs in one plane.  This repo is based on Grbl's dev branch, as it happened to have recent changes that are necessary to this project.  We will likely continue to merge in changes from Grbl.  Below is the remainder of Grbl's readme.
 
 ------------
 
