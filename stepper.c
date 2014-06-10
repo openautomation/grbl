@@ -57,7 +57,7 @@
 // discarded when entirely consumed and completed by the segment buffer. Also, AMASS alters this
 // data for its own use. 
 typedef struct {  
-  uint8_t direction_bits;
+  StepDirWord direction_bits;
   uint32_t steps[N_AXIS];
   uint32_t step_event_count;
 } st_block_t;
@@ -84,12 +84,12 @@ typedef struct {
   // Used by the bresenham line algorithm
   uint32_t counters[N_AXIS];        // Counter variables for the bresenham line tracer
   #ifdef STEP_PULSE_DELAY
-    uint8_t step_bits;  // Stores out_bits output to complete the step pulse delay
+    StepDirWord step_bits;  // Stores out_bits output to complete the step pulse delay
   #endif
   
   uint8_t execute_step;     // Flags step execution for each interrupt.
   uint8_t step_pulse_time;  // Step pulse reset time after step rise
-  uint8_t step_outbits;         // The next stepping-bits to be output
+  StepDirWord step_outbits;         // The next stepping-bits to be output
   StepDirWord dir_outbits;
   #ifdef ADAPTIVE_MULTI_AXIS_STEP_SMOOTHING
     uint32_t steps[N_AXIS];

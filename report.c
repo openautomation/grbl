@@ -84,7 +84,7 @@ void report_status_message(uint8_t status_code)
       default:
         // Remaining g-code parser errors with error codes
         printPgmString(PSTR("Invalid gcode ID:"));
-        print_uint8_base10(status_code); // Print error code for user reference
+        print_unsigned_base10(status_code); // Print error code for user reference
     }
     printPgmString(PSTR("\r\n"));
   }
@@ -169,27 +169,27 @@ void report_grbl_settings() {
   printPgmString(PSTR(" (z accel, mm/sec^2)\r\n$9=")); printFloat(-settings.max_travel[X_AXIS]); // Grbl internally store this as negative.
   printPgmString(PSTR(" (x max travel, mm)\r\n$10=")); printFloat(-settings.max_travel[Y_AXIS]); // Grbl internally store this as negative.
   printPgmString(PSTR(" (y max travel, mm)\r\n$11=")); printFloat(-settings.max_travel[Z_AXIS]); // Grbl internally store this as negative.
-  printPgmString(PSTR(" (z max travel, mm)\r\n$12=")); print_uint8_base10(settings.pulse_microseconds);
-  printPgmString(PSTR(" (step pulse, usec)\r\n$13=")); print_uint8_base10(settings.step_invert_mask); 
-  printPgmString(PSTR(" (step port invert mask:")); print_uint8_base2(settings.step_invert_mask);  
-  printPgmString(PSTR(")\r\n$14=")); print_uint8_base10(settings.dir_invert_mask); 
-  printPgmString(PSTR(" (dir port invert mask:")); print_uint8_base2(settings.dir_invert_mask);  
-  printPgmString(PSTR(")\r\n$15=")); print_uint8_base10(settings.stepper_idle_lock_time);
+  printPgmString(PSTR(" (z max travel, mm)\r\n$12=")); print_unsigned_base10(settings.pulse_microseconds);
+  printPgmString(PSTR(" (step pulse, usec)\r\n$13=")); print_unsigned_base10(settings.step_invert_mask);
+  printPgmString(PSTR(" (step port invert mask:")); print_base2(settings.step_invert_mask);
+  printPgmString(PSTR(")\r\n$14=")); print_unsigned_base10(settings.dir_invert_mask);
+  printPgmString(PSTR(" (dir port invert mask:")); print_base2(settings.dir_invert_mask);
+  printPgmString(PSTR(")\r\n$15=")); print_unsigned_base10(settings.stepper_idle_lock_time);
   printPgmString(PSTR(" (step idle delay, msec)\r\n$16=")); printFloat(settings.junction_deviation);
   printPgmString(PSTR(" (junction deviation, mm)\r\n$17=")); printFloat(settings.arc_tolerance);
-  printPgmString(PSTR(" (arc tolerance, mm)\r\n$18=")); print_uint8_base10(settings.decimal_places);
-  printPgmString(PSTR(" (n-decimals, int)\r\n$19=")); print_uint8_base10(bit_istrue(settings.flags,BITFLAG_REPORT_INCHES));
-  printPgmString(PSTR(" (report inches, bool)\r\n$20=")); print_uint8_base10(bit_istrue(settings.flags,BITFLAG_AUTO_START));
-  printPgmString(PSTR(" (auto start, bool)\r\n$21=")); print_uint8_base10(bit_istrue(settings.flags,BITFLAG_INVERT_ST_ENABLE));
-  printPgmString(PSTR(" (invert step enable, bool)\r\n$22=")); print_uint8_base10(bit_istrue(settings.flags,BITFLAG_INVERT_LIMIT_PINS));
-  printPgmString(PSTR(" (invert limit pins, bool)\r\n$23=")); print_uint8_base10(bit_istrue(settings.flags,BITFLAG_SOFT_LIMIT_ENABLE));
-  printPgmString(PSTR(" (soft limits, bool)\r\n$24=")); print_uint8_base10(bit_istrue(settings.flags,BITFLAG_HARD_LIMIT_ENABLE));
-  printPgmString(PSTR(" (hard limits, bool)\r\n$25=")); print_uint8_base10(bit_istrue(settings.flags,BITFLAG_HOMING_ENABLE));
-  printPgmString(PSTR(" (homing cycle, bool)\r\n$26=")); print_uint8_base10(settings.homing_dir_mask);
-  printPgmString(PSTR(" (homing dir invert mask:")); print_uint8_base2(settings.homing_dir_mask);  
+  printPgmString(PSTR(" (arc tolerance, mm)\r\n$18=")); print_unsigned_base10(settings.decimal_places);
+  printPgmString(PSTR(" (n-decimals, int)\r\n$19=")); print_unsigned_base10(bit_istrue(settings.flags,BITFLAG_REPORT_INCHES));
+  printPgmString(PSTR(" (report inches, bool)\r\n$20=")); print_unsigned_base10(bit_istrue(settings.flags,BITFLAG_AUTO_START));
+  printPgmString(PSTR(" (auto start, bool)\r\n$21=")); print_unsigned_base10(bit_istrue(settings.flags,BITFLAG_INVERT_ST_ENABLE));
+  printPgmString(PSTR(" (invert step enable, bool)\r\n$22=")); print_unsigned_base10(bit_istrue(settings.flags,BITFLAG_INVERT_LIMIT_PINS));
+  printPgmString(PSTR(" (invert limit pins, bool)\r\n$23=")); print_unsigned_base10(bit_istrue(settings.flags,BITFLAG_SOFT_LIMIT_ENABLE));
+  printPgmString(PSTR(" (soft limits, bool)\r\n$24=")); print_unsigned_base10(bit_istrue(settings.flags,BITFLAG_HARD_LIMIT_ENABLE));
+  printPgmString(PSTR(" (hard limits, bool)\r\n$25=")); print_unsigned_base10(bit_istrue(settings.flags,BITFLAG_HOMING_ENABLE));
+  printPgmString(PSTR(" (homing cycle, bool)\r\n$26=")); print_unsigned_base10(settings.homing_dir_mask);
+  printPgmString(PSTR(" (homing dir invert mask:")); print_base2(settings.homing_dir_mask);
   printPgmString(PSTR(")\r\n$27=")); printFloat(settings.homing_feed_rate);
   printPgmString(PSTR(" (homing feed, mm/min)\r\n$28=")); printFloat(settings.homing_seek_rate);
-  printPgmString(PSTR(" (homing seek, mm/min)\r\n$29=")); print_uint8_base10(settings.homing_debounce_delay);
+  printPgmString(PSTR(" (homing seek, mm/min)\r\n$29=")); print_unsigned_base10(settings.homing_debounce_delay);
   printPgmString(PSTR(" (homing debounce, msec)\r\n$30=")); printFloat(settings.homing_pulloff);
   printPgmString(PSTR(" (homing pull-off, mm)\r\n")); 
 }
@@ -229,7 +229,7 @@ void report_ngc_parameters()
     switch (coord_select) {
       case 6: printPgmString(PSTR("28")); break;
       case 7: printPgmString(PSTR("30")); break;
-      default: print_uint8_base10(coord_select+54); break; // G54-G59
+      default: print_unsigned_base10(coord_select+54); break; // G54-G59
     }  
     printPgmString(PSTR(":"));         
     for (i=0; i<N_AXIS; i++) {
@@ -262,7 +262,7 @@ void report_gcode_modes()
   }
 
   printPgmString(PSTR(" G"));
-  print_uint8_base10(gc_state.modal.coord_select+54);
+  print_unsigned_base10(gc_state.modal.coord_select+54);
   
   switch (gc_state.modal.plane_select) {
     case PLANE_SELECT_XY : printPgmString(PSTR(" G17")); break;
@@ -300,7 +300,7 @@ void report_gcode_modes()
   }
   
   printPgmString(PSTR(" T"));
-  print_uint8_base10(gc_state.tool);
+  print_unsigned_base10(gc_state.tool);
   
   printPgmString(PSTR(" F"));
   printFloat(gc_state.feed_rate);
@@ -311,7 +311,7 @@ void report_gcode_modes()
 // Prints specified startup line
 void report_startup_line(uint8_t n, char *line)
 {
-  printPgmString(PSTR("$N")); print_uint8_base10(n);
+  printPgmString(PSTR("$N")); print_unsigned_base10(n);
   printPgmString(PSTR("=")); printString(line);
   printPgmString(PSTR("\r\n"));
 }

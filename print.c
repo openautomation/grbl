@@ -62,9 +62,16 @@ void printPgmString(const char *s)
 // 			'A' + buf[i - 1] - 10);
 // }
 
-void print_uint8_base2(uint8_t n)
+void print_base2(unsigned long n, uint8_t digits)
 { 
-	unsigned char buf[8];
+
+	unsigned long mask = 1 << (digits-1);
+	while(mask) {
+		serial_write(n & mask ? '1' : '0');
+		mask >>= 1;
+	}
+
+	/*unsigned char buf[8];
 	uint8_t i = 0;
 
 	for (; i < 8; i++) {
@@ -73,10 +80,10 @@ void print_uint8_base2(uint8_t n)
 	}
 
 	for (; i > 0; i--)
-		serial_write('0' + buf[i - 1]);
+		serial_write('0' + buf[i - 1]);*/
 }
 
-void print_uint8_base10(uint8_t n)
+/*void print_uint8_base10(uint8_t n)
 { 
   if (n == 0) {
     serial_write('0');
@@ -93,9 +100,9 @@ void print_uint8_base10(uint8_t n)
 
   for (; i > 0; i--)
       serial_write(buf[i - 1]);
-}
+}*/
 
-void print_uint32_base10(unsigned long n)
+void print_unsigned_base10(unsigned long n)
 { 
   if (n == 0) {
     serial_write('0');
@@ -118,9 +125,9 @@ void printInteger(long n)
 {
   if (n < 0) {
     serial_write('-');
-    print_uint32_base10((-n));
+    print_unsigned_base10((-n));
   } else {
-    print_uint32_base10(n);
+    print_unsigned_base10(n);
   }
 }
 

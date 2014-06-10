@@ -140,7 +140,7 @@ void delay_us(uint32_t us)
 
 
 // Returns direction mask according to Grbl internal axis indexing.
-uint8_t get_direction_mask(uint8_t axis_idx)
+StepDirWord get_direction_mask(uint8_t axis_idx)
 {
   uint8_t axis_mask = bit(axis_idx + X_DIRECTION_BIT);
   return(axis_mask);

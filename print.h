@@ -31,12 +31,11 @@ void printPgmString(const char *s);
 
 void printInteger(long n);
 
-void print_uint32_base10(uint32_t n);
-
-void print_uint8_base2(uint8_t n);
-
-void print_uint8_base10(uint8_t n);
+void print_unsigned_base10(uint8_t n);
 
 void printFloat(float n);
+
+void print_base2(unsigned long n, uint8_t size);
+#define print_base2(n) print_base2((n), sizeof(n)*8)
 
 #endif

@@ -65,8 +65,8 @@ typedef struct {
   float acceleration[N_AXIS];
   float max_travel[N_AXIS];
   uint8_t pulse_microseconds;
-  uint8_t step_invert_mask;
-  uint8_t dir_invert_mask;
+  StepDirWord step_invert_mask;
+  StepDirWord dir_invert_mask;
   uint8_t stepper_idle_lock_time; // If max value 255, steppers do not disable.
   float junction_deviation;
   float arc_tolerance;
